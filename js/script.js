@@ -40,7 +40,7 @@ window.addEventListener('DOMContentLoaded', () =>{
 
     // Timer
 
-    const deadline = '2023-05-31';
+    const deadline = '2023-06-31';
 
     function getTimeRemaining(endtime) {
         const t = Date.parse(endtime) - Date.parse(new Date()), //разница во времени в милсек
@@ -96,8 +96,7 @@ window.addEventListener('DOMContentLoaded', () =>{
     // Modal
 
     const modalTrigger = document.querySelectorAll('[data-modal]'), // отмечаем кнопки модального триггера
-        modal = document.querySelector('.modal'), // переменная для самого модольного окна
-        modalCloseBtn = document.querySelector('[data-close]'); //переменная для кнопки закрытия модального окна
+        modal = document.querySelector('.modal'); //переменная для кнопки закрытия модального окна
 
     function openModal() {
         // modal.classList.add('show');
@@ -117,10 +116,10 @@ window.addEventListener('DOMContentLoaded', () =>{
         clearInterval(modelTimerId); // не открывать повторно модальное окно, если оно уже было открыто пользователем
     }
 
-    modalCloseBtn.addEventListener('click', closeModal); // функцию не запускаем
+     // функцию не запускаем
 
     modal.addEventListener('click', (e) => { //закрывает модальное окно при клиеке на любую область modal
-        if (e.target === modal) {
+        if (e.target === modal || e.target.getAttribute('data-close') == '') {
            closeModal();// возвращает скролл после закрытия модального окна, тут функцию запускаем
         }
     });
@@ -131,7 +130,7 @@ window.addEventListener('DOMContentLoaded', () =>{
         }
     });
 
-    // const modelTimerId = setTimeout(openModal, 5000);
+    const modelTimerId = setTimeout(openModal, 50000);
 
      function showModalByScroll() {
         if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight) { //контроль полного скроллинга  страницы
@@ -223,33 +222,81 @@ window.addEventListener('DOMContentLoaded', () =>{
 
    const forms =  document.querySelectorAll('form');
 
-   const message = {
-        loading: 'Загрузка',
+   const message = { // список фраз для сообщений пользователю
+        loading: 'img\form\spinner.svg',
         success: 'Спасибо! Скоро мы с вами свяжемся',
         failure: 'Что-то пошло не так...'
-   }
+   };
+
+   forms.forEach(item => { // подвязываем все наши формы под функцию postData
+        postData(item);
+   });
 
    function postData(form) {
         form.addEventListener('submit', (e) => {
-            e.preventDefault();
+            e.preventDefault();  // отменяет дефолтное поведение браузера (перезагрузку при отправке формы)
 
-            const statusMessage = document.createElement('div');
+            const statusMessage = document.createElement('img'); // создаём новый элкмент
+            statusMessage.src = message.loading; // создаём в новом элементе класс
+            statusMessage.style.cssText = `
+                display: block;
+                margin: 0 auto;
+            `; // сообщаем, что идёт загрузка
+            form.insertAdjacentElement('afterend', statusMessage); // добавляем сообщение к форме
 
-            const request = new XMLHttpRequest();
-            request.open('POST', 'server.php');
+          
 
-            request.setRequestHeader('Content-type', 'multipart/form-data');
-            const formDate = new FormData(form);
+           
+            const formData = new FormData(form); // для передачи в стандарте Формдейта важно наличие в вёрстке параметра "name"
 
-            request.send(formData);
+            const object = {};
+            formData.forEach(function(value,key){
+                object[key] = value;
+            });
 
-            request.addEventListener('load', () => {
-                if (request.status === 200) {
-                    console.log(request.responce)
-                }
+            fetch('server.php', {
+                method: "POST",
+                headers: {
+                    'Content-type': 'application/json'
+                },
+                body: JSON.stringify(object)
             })
+            .then(data => data.text())
+            .then(data => {
+                console.log(data);
+                showThanksModal(message.success); // сообщение об успешной загрузке
+                statusMessage.remove();
+            }).catch(() => {
+                showThanksModal(message.failure);
+            }).finally(() => {
+                form.reset();
+            });           
         });
    }
+function showThanksModal(message) { // скрыть модуль диалога и вывести благодарность пользователю
+    const prevModalDialog = document.querySelector('.modal__dialog');
+
+    prevModalDialog.classList.add('hide');
+    openModal();
+
+    const thanksModal = document.createElement('div');
+    thanksModal.classList.add('modal__dialog');
+    thanksModal.innerHTML = `
+        <div class="modal__content">
+            <div class="modal__close" data-close>&times;</div>
+            <div class="modal__title">${message}</div>
+        </div>
+    `;
+
+    document.querySelector('.modal').append(thanksModal);
+    setTimeout(() => {
+        thanksModal.remove();
+        prevModalDialog.classList.add('show');
+        prevModalDialog.classList.remove('hide');
+        closeModal();
+    }, 4000);
+}
+    
 });
 
 
