@@ -350,8 +350,8 @@ slides.forEach(slide => {
 slider.style.position = 'relative';
 
 const indicators = document.createElement('ol'),
-    dots = [];
-indicators.classList.add('carusel-indicators');
+    dots = []; // создаём массив для получения метода push
+indicators.classList.add('carusel-indicators'); // создаём класс
 indicators.style.cssText = `
     position: absolute;
     right: 0;
@@ -364,11 +364,11 @@ indicators.style.cssText = `
     margin-left: 15%;
     list-style: none;
 `;
-slider.append(indicators);
+slider.append(indicators); // помещаем обёртку внутри слайдера
 
-for (let i = 0; i < slides.length; i++) {
+for (let i = 0; i < slides.length; i++) { //создаём точки слайдера
     const dot = document.createElement('li');
-    dot.setAttribute('data-slide-to', i + 1);
+    dot.setAttribute('data-slide-to', i + 1); // устанавливаем атрибут
     dot.style.cssText = `
         box-sizing: content-box;
         flex: 0 1 auto;
@@ -384,13 +384,27 @@ for (let i = 0; i < slides.length; i++) {
         opacity: .5;
         transition: opacity .6s ease;
     `;
-    if (i == 0) {
-        dot.style.opacity = 1;
+    if (i == 0) { 
+        dot.style.opacity = 1;  // привязываем первую точку к первому слайду
     }
     indicators.append(dot);
-    dots.push(dot);
+    dots.push(dot); // помещаем точку в массив dot
 }
 
+function slidesMarker() {
+    // подсвечиваем маркеры кадров слайдера
+    if (slides.length < 10) {
+        current.textContent = `0${slideIndex}`;
+    } else {
+        current.textContent = slideIndex;
+    }
+
+        dots.forEach(dot => dot.style.opacity = '.5'); // устанавливаем прозрачноость 0,5 каждой точке массива
+        dots[slideIndex - 1].style.opacity = 1} // устанавливаем прозрачноость 1 активной точке массива
+
+function slidesTransform() {
+    slidesField.style.transform = `translateX(-${offset}px)`; //смещение слайда
+}
 
 next.addEventListener('click', () => {
     if (offset == +width.slice(0, width.length - 2) * (slides.length - 1)){
@@ -399,7 +413,7 @@ next.addEventListener('click', () => {
         offset += +width.slice(0, width.length - 2);
     }
 
-    slidesField.style.transform = `translateX(-${offset}px)`;
+    slidesTransform();
 
     if (slideIndex == slides.length) {
         slideIndex = 1;
@@ -407,14 +421,7 @@ next.addEventListener('click', () => {
         slideIndex++;
     } 
 
-    if (slides.length < 10) {
-        current.textContent = `0${slideIndex}`;
-    } else {
-        current.textContent = slideIndex;
-    }
-// подсвечиваем маркеры кадров слайдера
-    dots.forEach(dot => dot.style.opacity = '.5');
-    dots[slideIndex - 1].style.opacity = 1;
+    slidesMarker();
 });
 
 prev.addEventListener('click', () => {
@@ -424,7 +431,7 @@ prev.addEventListener('click', () => {
         offset -= +width.slice(0, width.length - 2);
     }
 
-    slidesField.style.transform = `translateX(-${offset}px)`;
+    slidesTransform();
 
     
     if (slideIndex == 1) {
@@ -433,32 +440,19 @@ prev.addEventListener('click', () => {
         slideIndex--;
     } 
 
-    if (slides.length < 10) {
-        current.textContent = `0${slideIndex}`;
-    } else {
-        current.textContent = slideIndex;
-    }
-    dots.forEach(dot => dot.style.opacity = '.5');
-    dots[slideIndex - 1].style.opacity = 1;
+    slidesMarker();
 });
 // навигация по маркепам слайдера
     dots.forEach(dot => {
-        dot.addEventListener('click', (e) => {
+        dot.addEventListener('click', (e) => { //навешиваем обработчик событий на каждую точку
             const slideTo = e.target.getAttribute('data-slide-to')
 
             slideIndex = slideTo;
             offset = +width.slice(0, width.length - 2) * (slideTo - 1);
 
-            slidesField.style.transform = `translateX(-${offset}px)`;
+        slidesTransform();
 
-            if (slides.length < 10) {
-                current.textContent = `0${slideIndex}`;
-            } else {
-                current.textContent = slideIndex;
-            }
-
-            dots.forEach(dot => dot.style.opacity = '.5');
-            dots[slideIndex - 1].style.opacity = 1;
+         slidesMarker();
         });
     });
 
