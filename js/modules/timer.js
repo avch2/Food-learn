@@ -1,7 +1,7 @@
-function timer() {
+function timer(id, deadline) {
     // Timer
 
-    const deadline = '2023-06-31';
+    //const deadline = '2023-08-31';
 
     function getTimeRemaining(endtime) {
         const t = Date.parse(endtime) - Date.parse(new Date()), //разница во времени в милсек
@@ -52,7 +52,7 @@ function timer() {
         }
     }
 
-    setClock('.timer', deadline);
+    setClock(id, deadline);
 }
 
-module.exports = timer;
+export default timer;

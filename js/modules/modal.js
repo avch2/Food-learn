@@ -1,26 +1,36 @@
-function modal() {
+function closeModal(modalSelector) {
+    const modal = document.querySelector(modalSelector);
+
+    modal.classList.add('hide');
+    modal.classList.remove('show');
+    //modal.classList.toggle('show');
+    document.body.style.overflow = ''; // возвращает скролл после закрытия модального окна
+}
+
+function openModal(modalSelector, modalTimerId) {
+    const modal = document.querySelector(modalSelector);
+
+    modal.classList.add('show');
+    modal.classList.remove('hide');
+    //modal.classList.toggle('show');
+    document.body.style.overflow = 'hidden'; // удаляет скролл на время модального окна
+    
+    console.log(modalTimerId);
+    if (modalTimerId) {
+        clearInterval(modalTimerId); // не открывать повторно модальное окно, если оно уже было открыто пользователем
+        }
+}
+    
+
+function modal(triggerSelector, modalSelector, modalTimerId) {
     // Modal
 
-    const modalTrigger = document.querySelectorAll('[data-modal]'), // отмечаем кнопки модального триггера
-        modal = document.querySelector('.modal'); //переменная для кнопки закрытия модального окна
+    const modalTrigger = document.querySelectorAll(triggerSelector), // отмечаем кнопки модального триггера
+        modal = document.querySelector(modalSelector); //переменная для кнопки закрытия модального окна
 
-    function openModal() {
-        // modal.classList.add('show');
-        // modal.classList.remove('hide');
-        modal.classList.toggle('show');
-        document.body.style.overflow = 'hidden'; // удаляет скролл на время модального окна
-    }
     modalTrigger.forEach(btn => { // привязка к нескольким кнопкам псевдомассива
-        btn.addEventListener('click', openModal);
+        btn.addEventListener('click', () => openModal(modalSelector, modalTimerId));
     });
-    
-    function closeModal() {
-        // modal.classList.add('hide');
-        // modal.classList.remove('show');
-        modal.classList.toggle('show');
-        document.body.style.overflow = ''; // возвращает скролл после закрытия модального окна
-        clearInterval(modelTimerId); // не открывать повторно модальное окно, если оно уже было открыто пользователем
-    }
 
      // функцию не запускаем
 
@@ -32,15 +42,13 @@ function modal() {
 
     document.addEventListener('keydown', (e) => { //закрывает модальное окно при нажатии на кнопку Esc
         if (e.code === 'Escape' && modal.classList.contains('show')) { // и показано ли окно вообще (содержит ли класс 'show')
-            closeModal();
+            closeModal(modalSelector);
         }
     });
 
-    const modelTimerId = setTimeout(openModal, 50000);
-
      function showModalByScroll() {
         if (window.pageYOffset + document.documentElement.clientHeight >= document.documentElement.scrollHeight) { //контроль полного скроллинга  страницы
-            openModal();
+            openModal(modalSelector, modalTimerId);
             window.removeEventListener('scroll', showModalByScroll);
         }
      }
@@ -48,4 +56,6 @@ function modal() {
      window.addEventListener('scroll', showModalByScroll); // отслеживание скроллинга до конца
 
 }
-module.exports = modal;
+export default modal;
+export {closeModal};
+export {openModal};
